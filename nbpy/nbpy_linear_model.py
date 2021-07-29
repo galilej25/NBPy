@@ -149,11 +149,11 @@ class NBR(object):
             self,
             fname,
             n_nodes,
-            predictor_cols,
             mod,
-            alternative,
+            alternative=None,
+            predictor_cols=None,
             diag=False,
-            thr_p=0.05,
+            thr_p=None,
             thr_t=None,
             nudist=False,
             exp_list=None,
@@ -172,6 +172,12 @@ class NBR(object):
             self.data.columns = [c.replace('.', '_') for c in self.data.columns]
         except FileNotFoundError:
             print('[error] File Not Found!')
+
+        if predictor_cols is None:
+            predictor_cols = ['Group', 'Sex', 'Age']
+
+        if alternative is None:
+            alternative = "two.sided"
 
         self.n_nodes = n_nodes
         self.predictor_cols = predictor_cols
@@ -314,7 +320,7 @@ class NBR(object):
             ncompFWE = group['components'].apply(
                 lambda x: np.sum(df_obs_perm_grp.loc[variable]['max_comp'] > x) / n_perm
             ).to_dict(OrderedDict)
-            # FIXME: end of conversion to dict
+
             strnFWE = group.groupby(by=['components'])['strength'].apply(
                 lambda x: pd.DataFrame(
                     np.vstack(
@@ -327,6 +333,7 @@ class NBR(object):
                 )
             ).reset_index().drop(columns='level_1').set_index('components').to_dict(orient='dict')
 
+            # FIXME: add additional columns
             df = pd.DataFrame(
                 np.vstack((list(strnFWE['strnFWE'].keys()), list(strnFWE['strnFWE'].values()), list(strnFWE['strn'].values()))).T,
                 columns=['Component', 'strnFWE', 'strn']
@@ -334,7 +341,7 @@ class NBR(object):
             df['variable'] = variable
             df_final.append(df)
 
-        return pd.concat(df_final, ignore_index=True)
+        self.measured_observations = pd.concat(df_final, ignore_index=True)
 
     def run_linear_mixture_models(self, n_cores=None, n_perm=None):
         """
