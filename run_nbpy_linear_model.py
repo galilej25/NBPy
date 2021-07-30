@@ -36,6 +36,8 @@ def main():
         n_perm=int(options.n_perm),
     )
 
+    nbr_model.measured_observations.to_csv('tmp.csv', index=False)
+
 
 if __name__ == "__main__":
     main()
