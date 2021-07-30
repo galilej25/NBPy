@@ -317,29 +317,32 @@ class NBR(object):
         # iterate over variable
         df_final = []
         for variable, group in self.init_observations.groupby(by=['variable']):
-            ncompFWE = group['components'].apply(
-                lambda x: np.sum(df_obs_perm_grp.loc[variable]['max_comp'] > x) / n_perm
-            ).to_dict(OrderedDict)
+            try:
+                ncompFWE = group['components'].apply(
+                    lambda x: np.sum(df_obs_perm_grp.loc[variable]['max_comp'] > x) / n_perm
+                ).to_dict(OrderedDict)
 
-            strnFWE = group.groupby(by=['components'])['strength'].apply(
-                lambda x: pd.DataFrame(
-                    np.vstack(
-                        (
-                            np.sum(df_obs_perm_grp.loc[variable]['max_sum_str'] > np.sum(np.abs(x))) / n_perm,
-                            np.sum(np.abs(x)),
-                        )
-                    ).T,
-                    columns=['strnFWE', 'strn']
+                strnFWE = group.groupby(by=['components'])['strength'].apply(
+                    lambda x: pd.DataFrame(
+                        np.vstack(
+                            (
+                                np.sum(df_obs_perm_grp.loc[variable]['max_sum_str'] > np.sum(np.abs(x))) / n_perm,
+                                np.sum(np.abs(x)),
+                            )
+                        ).T,
+                        columns=['strnFWE', 'strn']
+                    )
+                ).reset_index().drop(columns='level_1').set_index('components').to_dict(orient='dict')
+
+                # FIXME: add additional columns
+                df = pd.DataFrame(
+                    np.vstack((list(strnFWE['strnFWE'].keys()), list(strnFWE['strnFWE'].values()), list(strnFWE['strn'].values()))).T,
+                    columns=['Component', 'strnFWE', 'strn']
                 )
-            ).reset_index().drop(columns='level_1').set_index('components').to_dict(orient='dict')
-
-            # FIXME: add additional columns
-            df = pd.DataFrame(
-                np.vstack((list(strnFWE['strnFWE'].keys()), list(strnFWE['strnFWE'].values()), list(strnFWE['strn'].values()))).T,
-                columns=['Component', 'strnFWE', 'strn']
-            )
-            df['variable'] = variable
-            df_final.append(df)
+                df['variable'] = variable
+                df_final.append(df)
+            except KeyError:
+                continue
 
         self.measured_observations = pd.concat(df_final, ignore_index=True)
 

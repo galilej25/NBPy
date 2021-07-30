@@ -59,6 +59,7 @@
 \usepackage{multicol} % Allows multiple columns
 %\usepackage{wasysym} % Allows mars and venus symbols
 \usepackage[english]{babel}
+\usepackage{listings}
 %\usepackage{xcolor}
 
 %---------------------------------------------------------------------------------
@@ -88,7 +89,7 @@
 
 \subject{NBpy}
 % This is only inserted into the PDF information catalog. Can be left
-% out. 
+% out.
 
 % If you have a file called "university-logo-filename.xxx", where xxx
 % is a graphic format that can be processed by latex or pdflatex,
@@ -123,7 +124,7 @@
 
 \begin{frame}{Context}%2
   \framesubtitle{Longitudinal brain networks}
-  
+
   \centering
   \includegraphics[width=.8\linewidth]{voles.jpg}\\[0.25cm]
 
@@ -134,7 +135,7 @@
 
 \begin{frame}{Context}%3
   \framesubtitle{Prairie voles}
-  
+
   \centering
   \includegraphics[width=.8\linewidth]{rmvoles.jpeg}\\[0.25cm]
 
@@ -146,25 +147,152 @@
 \begin{frame}{Network Based Statistics framework}%4
   \centering
   \includegraphics[width=\textwidth]{NBR.png}\\[0.1cm]
-  
+
   \raggedright
   (Gracia-Tabuenca \& Alcauter, \textit{bioRxiv}, 2021)
 
 \end{frame}
 
 \begin{frame}{NBR}%5
-  
+
   \large
   \begin{itemize}
     \item First CRAN release 0.1.2 (March 2020)
     \begin{itemize}
         \item \url{https://cran.r-project.org/package=NBR}
         \item $>$6k downloads (\url{https://cranlogs.r-pkg.org/badges/grand-total/NBR})
-        \item Most mails from users ask about computing efficiency...
+        \item Computing efficiency is the biggest challenge, according to the mails from various users.
     \end{itemize}
   \end{itemize}
 
 \end{frame}
 
+\begin{frame}{NBPy}%6
+
+  \begin{center}
+        \textbf{\Large Python implementation}
+  \end{center}
+
+\end{frame}
+
+\begin{frame}{R2Py}%7
+
+  \begin{itemize}
+    \item \textbf{statsmodels} is a python framework designed for statistics, and allows users to fit statistical models using R-style formulas.
+    \item Simply import statsmodels' R-API:
+    \includegraphics[width=.8\linewidth]{statsmodels_api.png}\\[0.15cm]
+    \item And start R-hacking in Python, with API customization.
+  \end{itemize}
+
+
+\end{frame}
+
+
+\begin{frame}{statsmodel implementation}
+    \begin{itemize}
+        \item Statsmodel execution for 1000 randomly selected endog columns finished on average: 3.22 ± 0.73 [ms]
+    \end{itemize}
+    \begin{center}
+        \includegraphics[width=.8\linewidth]{statsmodel_linreg}
+    \end{center}
+
+\end{frame}
+
+\begin{frame}{statsmodel}
+    \begin{itemize}
+        \item Statsmodel execution for 1000 randomly selected endog columns finished on average: 3.22 ± 0.73 [ms]
+    \end{itemize}
+    \begin{center}
+        \includegraphics[width=.8\linewidth]{statsmodel_linreg}
+    \end{center}
+
+\end{frame}
+
+
+\begin{frame}{statsmodel}
+    \begin{itemize}
+        \item If we run linear regression across all endog columns (interconnections)
+    \end{itemize}
+    \begin{center}
+        \includegraphics[width=.9\linewidth]{statsmodel_columns}
+    \end{center}
+\end{frame}
+
+\begin{frame}{statsmodel}
+    \begin{itemize}
+        \item Can we improve performance by computing linear models across all input endog columns, by utilizing matrix computations?
+        \item For that reason we will call Pythonic API to handle input data with statsmodels.OLS.
+    \end{itemize}
+
+    \begin{center}
+        \includegraphics[width=.6\linewidth]{statsmodel_ols}
+    \end{center}
+\end{frame}
+
+\begin{frame}{statsmodel}
+    \begin{itemize}
+        \item Not possible to have an endog input with dimension higher than 1.
+    \end{itemize}
+
+    \begin{center}
+        \includegraphics[width=.9\linewidth]{statsmodel_ols_fail}
+    \end{center}
+\end{frame}
+
+\begin{frame}{sklearn/numpy}
+    \begin{itemize}
+        \item sklearn/numpy to the rescue.
+        \item We can perform matrix/broadcasting operations on a lowest level of abstraction.
+    \end{itemize}
+
+    \begin{center}
+        \includegraphics[width=.8\linewidth]{sklearn_linreg}
+    \end{center}
+\end{frame}
+
+\begin{frame}{sklearn/numpy}
+    \begin{itemize}
+        \item If we run linear regression across all endog columns (interconnections)
+        \item We achieve improvement of calculating linear regression models for all input endog columns from 1.24 seconds to 56.6ms
+    \end{itemize}
+
+    \begin{center}
+        \includegraphics[width=.8\linewidth]{sklearn_columns}
+    \end{center}
+\end{frame}
+
+\begin{frame}{sklearn/numpy}
+    \begin{itemize}
+        \item Although statsmodel has better support for statistical calculations (ie. faster computation of p and t vals), p and t vals calculation is embedeed into package.
+    \end{itemize}
+
+    \begin{center}
+        \includegraphics[width=.9\linewidth]{conclusion}
+    \end{center}
+\end{frame}
+
+
+\begin{frame}{Conclusion}%6
+
+  \begin{center}
+        \textbf{\Large Conclusion}
+  \end{center}
+
+\end{frame}
+
+\begin{frame}{Conclusion}%6
+
+  \begin{itemize}
+      \item R implementation has reach statistical libraries.
+      \item On contrary, Python requires implementation of p and t values.
+      \item However, it is faster to load bigger datasets with Python and it allows broadcasting/matrix operations.
+      \item \textbf{Improvements}:
+      \begin{itemize}
+          \item Instead of \textbf{sklearn} we can utilize \textbf{numpy.linalg.lstsq} library to compute coefficients of linear regression.
+          \item Improve calculation of \textbf{FWE} strength values.
+      \end{itemize}
+  \end{itemize}
+
+\end{frame}
 
 \end{document}
